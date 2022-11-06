@@ -1,0 +1,8 @@
+.*
+!.gitignore
+/build-*
+*.workspace
+Makefile
+*.mk
+*.project
+*/compile_flags.txt
