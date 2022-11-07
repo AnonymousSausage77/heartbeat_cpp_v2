@@ -9,6 +9,14 @@
 namespace roboseals
 {
 
+/**
+ * @class TCPSocket
+ * @author John Bures 
+ * @date 11/07/22
+ * @file TCPSocket.hpp
+ * @brief A virtual socket that defines most of the functionality for the TCP socket. This is not specific to the RobotX challenge, however,
+ *  and is reusable in other situations. It is threadsafe (unless recorded elsewhere).
+ */
 class TCPSocket : virtual public AbstractTCPSocket
 {
 public:

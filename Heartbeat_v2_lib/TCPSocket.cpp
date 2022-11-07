@@ -136,12 +136,14 @@ void roboseals::TCPSocket::readBytes()
  
 }
 
+// not thread safe
 void roboseals::TCPSocket::addListener(std::weak_ptr<Observer> &listener) 
 {
     this->_listeners.push_back(listener);
 }
 
 
+// not thread safe 
 void roboseals::TCPSocket::updateListeners(int32_t signal, const std::string &message) const
 {
     roboseals::update(_listeners, signal, message);
