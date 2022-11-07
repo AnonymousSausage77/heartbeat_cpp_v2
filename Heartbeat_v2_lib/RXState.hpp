@@ -45,6 +45,14 @@ enum class SystemMode : unsigned int {
     Killed = 3
 };
 
+/**
+ * @class RXSystemState
+ * @author John Bures 
+ * @date 11/07/22
+ * @file RXState.hpp
+ * @brief The internal model of the Heartbeat system. Each heartbeat message is built from the data held within an instantiation of this
+ *  struct.
+ */
 struct RXSystemState {
     UAV_Status uavStatus;
     SystemMode systemMode;

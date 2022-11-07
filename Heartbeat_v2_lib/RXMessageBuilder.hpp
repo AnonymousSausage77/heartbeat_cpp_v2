@@ -7,6 +7,13 @@
 
 namespace roboseals::RX_Message {
 
+    /**
+     * @class RXMessageBuilder
+     * @author John Bures
+     * @date 11/07/22
+     * @file RXMessageBuilder.hpp
+     * @brief Builder pattern, used to construct messages for the Technical Director's network.
+     */
 class RXMessageBuilder
 {
 public:

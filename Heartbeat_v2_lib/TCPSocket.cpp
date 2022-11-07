@@ -142,7 +142,7 @@ void roboseals::TCPSocket::addListener(std::weak_ptr<Observer> &listener)
 }
 
 
-void updateListeners(int32_t signal, const std::string &message) const
+void roboseals::TCPSocket::updateListeners(int32_t signal, const std::string &message) const
 {
     roboseals::update(_listeners, signal, message);
     

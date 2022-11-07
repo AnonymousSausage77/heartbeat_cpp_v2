@@ -7,7 +7,13 @@ namespace roboseals::RX_Message {
 
 class RXMessageBuilder;
 
-
+/**
+ * @class RXMessageFactory
+ * @author John Bures
+ * @date 11/07/22
+ * @file RXMessageFactory.hpp
+ * @brief Factory pattern, used to build messages to the Technical Director's network.
+ */
 class RXMessageFactory
 {
 public:
