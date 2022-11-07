@@ -1,12 +1,12 @@
-#include "AbstractTCPClient.hpp"
+#include "AbstractTCPSocket.hpp"
 #include <iostream>
 
-roboseals::AbstractTCPClient::AbstractTCPClient()
+roboseals::AbstractTCPSocket::AbstractTCPSocket()
 {
     std::cout << "TCP Client" << std::endl;
 }
 
-roboseals::AbstractTCPClient::~AbstractTCPClient()
+roboseals::AbstractTCPSocket::~AbstractTCPSocket()
 {
 }
 

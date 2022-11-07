@@ -16,38 +16,47 @@ roboseals::TCPSocket::~TCPSocket()
 void roboseals::TCPSocket::attemptClose() {
     // XXX: what happens for an already closed connection? or a connection not opened?
     // closing the connected socket
-    close(_client_fd);
-    _connected = false;
+    std::unique_lock<std::mutex> lock{this->_socketLock};
+    cv.wait(lock);
+    
+    if(_connected) {
+        close(_client_fd);
+        _connected = false;
+    }
+    
+    
+    cv.notify_one();
 }
 
+// not thread safe
 bool roboseals::TCPSocket::attemptConnect()
 {
     _connected = openSocket() && openConnection();
-     
     
-    // read message
-    //char buffer[1024] = { 0 };
-    //int valread = read(_sock, buffer, 1024);
-    //printf("%s\n", buffer);
- 
     return _connected;
 }
 
-void roboseals::TCPSocket::sendBytes(const uint8_t* bytes, const size_t bsize)
+void roboseals::TCPSocket::sendBytes(const char* bytes, const size_t bsize)
 {
+    std::unique_lock<std::mutex> lock{this->_socketLock};
+    cv.wait(lock);
+    
     // TODO: handle closed connection
     // send a message
     send(_sock, bytes, bsize, 0);
+    
+    cv.notify_one();
 }
 
 void roboseals::TCPSocket::sendBytes(const std::string& msg)
 {
     // TODO: handle closed connection
     // send a message
-    send(_sock, msg.c_str(), msg.length(), 0);
+    sendBytes(msg.c_str(), msg.size());
 }
 
-bool roboseals::TCPSocket::openSocket()
+// not thread safe
+bool roboseals::TCPSocket::openSocket() 
 {    
     std::cout << "Opening Socket..." << std::endl;
     
@@ -58,6 +67,7 @@ bool roboseals::TCPSocket::openSocket()
     return true;
 }
 
+// not thread safe
 bool roboseals::TCPSocket::openConnection()
 {
     struct sockaddr_in serv_addr;
@@ -85,3 +95,51 @@ bool roboseals::TCPSocket::openConnection()
     
     return true;
 }
+
+void roboseals::TCPSocket::readBytes()
+{
+    
+    size_t totalBytesRead = 0; // can be > 1024 bytes
+    
+    // reads message
+    const auto bufferSize = 1024;
+    char buffer[bufferSize] = { 0 };
+    int numberRead; // number of bytes read in the current frame
+    
+    // lock socket mutex
+    std::unique_lock<std::mutex> lock{this->_socketLock};
+    cv.wait(lock);
+    
+    while (numberRead = read(_sock, buffer, bufferSize) > 0) {
+     
+        // copy the bytes read into the _readBuffer...
+        if(numberRead > 0) {
+            _readBuffer.resize(numberRead + _readBuffer.size());
+            auto endPointer =  _readBuffer.data() + _readBuffer.size();
+            memcpy(endPointer, buffer, numberRead); // appends the buffer contents straight into the _readBuffer vector
+            totalBytesRead += numberRead;
+        }
+        
+    }
+    
+    cv.notify_one();
+    
+    // if there is an error
+    if(numberRead < 0) {
+        updateListeners(ERROR_SIGNAL, "Error reading socket bytes!");
+    }
+    
+    // update listeners that bytes have been read
+    if (totalBytesRead > 0) {
+        updateListeners(DATA_RECEIVED_SIGNAL, std::to_string(totalBytesRead) + " Bytes Received...");
+    }
+ 
+}
+
+/*
+template <typename T>
+static void copyAccross(const T *from, size_t fromSize, std::vector<T> &dest) {
+    dest.resize(fromSize); // resize the internal vector to the correct size
+    memcpy(dest.data, from, fromSize); // copy the data across
+   
+}*/
