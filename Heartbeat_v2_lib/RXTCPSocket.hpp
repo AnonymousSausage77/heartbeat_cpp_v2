@@ -8,6 +8,8 @@ namespace roboseals::RX_Message {
 class RXTCPSocket : public TCPSocket 
 {
 public:
+    RXTCPSocket() = delete;
+    RXTCPSocket(const int port, const std::string &ipAddress) : TCPSocket(port, ipAddress) {};
     const std::vector<char> popBytes() override;
     
     

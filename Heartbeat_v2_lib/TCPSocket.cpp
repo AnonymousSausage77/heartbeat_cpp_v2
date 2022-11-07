@@ -136,6 +136,18 @@ void roboseals::TCPSocket::readBytes()
  
 }
 
+void roboseals::TCPSocket::addListener(std::weak_ptr<Observer> &listener) 
+{
+    this->_listeners.push_back(listener);
+}
+
+
+void updateListeners(int32_t signal, const std::string &message) const
+{
+    roboseals::update(_listeners, signal, message);
+    
+}
+
 /*
 template <typename T>
 static void copyAccross(const T *from, size_t fromSize, std::vector<T> &dest) {

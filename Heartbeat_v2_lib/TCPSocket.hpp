@@ -12,6 +12,7 @@ namespace roboseals
 class TCPSocket : virtual public AbstractTCPSocket
 {
 public:
+    TCPSocket() = delete;
     TCPSocket(const int port, const std::string &ipAddress) : _port(port), _ipAddress(ipAddress) {};
     ~TCPSocket();
     bool attemptConnect() override;
@@ -19,9 +20,11 @@ public:
     void sendBytes(const char *bytes, const size_t bsize) override;
     void sendBytes(const std::string &msg) override;
     void readBytes() override;
-    
+    void addListener(std::weak_ptr<Observer> &listener) override; // adds a listener for when there is data received
+    bool isConnected() const {return _connected;}; // might need changing to an api call rather than a stored bool
 protected:
     std::vector<char> &readBuffer() { return _readBuffer; }
+    void updateListeners(int32_t signal, const std::string &message) const  override;
 private:
     bool openSocket();
     bool openConnection();
@@ -36,6 +39,7 @@ private:
 
     std::mutex _socketLock;
     std::condition_variable cv; // for controlling thread waits
+    std::vector<std::weak_ptr<Observer>> _listeners;
 
 };
 

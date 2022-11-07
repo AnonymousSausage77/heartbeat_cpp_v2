@@ -14,6 +14,7 @@ roboseals::RX_Message::RXController::RXController(std::shared_ptr<RXMessageFacto
         {
             // TODO: Add listener to TCP socket to handle acknowledgements
         });
+        
 }
 
 void roboseals::RX_Message::RXController::start() 

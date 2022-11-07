@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <vector>
 #include "Observer.hpp"
+#include <memory>
 
 namespace roboseals
 {
@@ -18,13 +19,13 @@ class AbstractTCPSocket
     ~AbstractTCPSocket();
     virtual void sendBytes(const char *bytes, const size_t bsize) = 0; // sends data to the server
     virtual void sendBytes(const std::string &msg) = 0;
-    virtual void addListener(Observer &listener) = 0; // adds a listener for when there is data received
     virtual bool isConnected() const = 0; // checks if the socket is connected
     virtual bool attemptConnect() = 0;
     virtual void attemptClose() = 0;
     virtual const std::vector<char> popBytes() = 0; // removes bytes from the buffer and returns them; returns an empty array if no bytes are found
     virtual void readBytes() = 0;
-    
+    virtual void addListener(std::weak_ptr<Observer>  &listener) = 0; // adds a listener for when there is data received
+
     protected:
     virtual void updateListeners(int32_t signal, const std::string &message) const = 0;
 
