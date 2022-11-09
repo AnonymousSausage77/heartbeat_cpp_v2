@@ -1,9 +1,17 @@
 #include "TCPSocket.hpp"
 
 #include <iostream>
+
+#ifdef __WIN32__
+#include <Winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+#else
 #include <arpa/inet.h>
-#include <stdio.h>
 #include <sys/socket.h>
+#endif
+
+#include <stdio.h>
 #include <unistd.h>
 #include <string>
 #include <string.h>

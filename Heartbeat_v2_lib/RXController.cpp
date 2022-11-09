@@ -32,7 +32,7 @@ void roboseals::RX_Message::RXController::start()
         }
         _TCPsocket->readBytes();
         
-        if(_rcAdaptor->shouldStop()) {
+        if(this->state().killed) {
             // close system
             stop();
         }
