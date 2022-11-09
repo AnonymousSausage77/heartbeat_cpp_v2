@@ -33,12 +33,6 @@ namespace roboseals::RooCOMMS {
          * @return A vector of messages that need to be forwarded
          */
         virtual std::vector<std::string> fetchMessagesToBeSent(roboseals::RX_Message::RXMessageFactory &factory) = 0;
-        /**
-         * @brief If the boat ever sends a message for the heartbeat program to stop, this will return true and the heartbeat system will stop
-         * sending heartbeat messages (or any messages for that matter) to the Technical Director
-         * @return true if the heartbeat should stop talking to the Technical Director's network
-         */
-        virtual bool shouldStop() const = 0;
     };
 }
 

@@ -54,13 +54,16 @@ enum class SystemMode : unsigned int {
  *  struct.
  */
 struct RXSystemState {
+    // boat state
     UAV_Status uavStatus;
     SystemMode systemMode;
     int64_t statusUpdateTimeStamp;
+    bool killed; // if true, heartbeat system will stop
 
+    // gps
     double longitude;
     double latitude;
-    int64_t gpsUpdateTimeStamp;
+    int64_t gpsUpdateTimeStamp; // last time of gps update
 };
 
 }
