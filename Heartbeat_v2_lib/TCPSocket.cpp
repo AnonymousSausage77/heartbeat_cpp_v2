@@ -24,68 +24,65 @@ roboseals::TCPSocket::~TCPSocket()
 void roboseals::TCPSocket::attemptClose() {
     // XXX: what happens for an already closed connection? or a connection not opened?
     // closing the connected socket
-    std::unique_lock<std::mutex> lock{this->_socketLock};
-    cv.wait(lock);
+    auto monitor = _context.manuallyLock();
     
-    if(_connected) {
-        close(_client_fd);
-        _connected = false;
+    if(isConnected()) {
+        close(monitor->client_fd);
     }
     
     
-    cv.notify_one();
 }
 
 // not thread safe
 bool roboseals::TCPSocket::attemptConnect()
 {
-    _connected = openSocket() && openConnection();
+    bool connected = openSocket() && openConnection();
     
-    return _connected;
+    return connected;
 }
 
 void roboseals::TCPSocket::sendBytes(const char* bytes, const size_t bsize)
 {
-    std::unique_lock<std::mutex> lock{this->_socketLock};
-    cv.wait(lock);
+    auto monitor = _context.manuallyLock();
     
     // TODO: handle closed connection
     // send a message
-    send(_sock, bytes, bsize, 0);
+    send(monitor->sock, bytes, bsize, 0);
     
-    cv.notify_one();
 }
 
 void roboseals::TCPSocket::sendBytes(const std::string& msg)
 {
+    auto monitor = _context.manuallyLock();
+    
     // TODO: handle closed connection
     // send a message
     sendBytes(msg.c_str(), msg.size());
 }
 
-// not thread safe
 bool roboseals::TCPSocket::openSocket() 
 {    
     std::cout << "Opening Socket..." << std::endl;
     
-    if ((_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((_context->sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         printf("\n Socket creation error \n");
         return false;
     }
     return true;
 }
 
-// not thread safe
 bool roboseals::TCPSocket::openConnection()
 {
+    auto monitor = _context.manuallyLock();
+    
     struct sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(_port);
+    serv_addr.sin_port = htons(monitor->port);
  
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
     // establishing connection...
-    if (inet_pton(AF_INET, _ipAddress.c_str(), &serv_addr.sin_addr)
+    if (inet_pton(AF_INET, monitor->ipAddress.c_str(), &serv_addr.sin_addr)
         <= 0) {
         printf(
             "\nInvalid address/ Address not supported \n");
@@ -93,8 +90,8 @@ bool roboseals::TCPSocket::openConnection()
     }
  
     std::cout << "Attempting connection..." << std::endl;
-    if ((_client_fd
-         = connect(_sock, (struct sockaddr*)&serv_addr,
+    if ((monitor->client_fd
+         = connect(monitor->sock, (struct sockaddr*)&serv_addr,
                    sizeof(serv_addr)))
         < 0) {
         printf("\nConnection Failed \n");
@@ -114,23 +111,21 @@ void roboseals::TCPSocket::readBytes()
     char buffer[bufferSize] = { 0 };
     int numberRead; // number of bytes read in the current frame
     
-    // lock socket mutex
-    std::unique_lock<std::mutex> lock{this->_socketLock};
-    cv.wait(lock);
+    // lock with monitor
+    auto monitor = _context.manuallyLock();
     
-    while (numberRead = read(_sock, buffer, bufferSize) > 0) {
+    while (numberRead = read(monitor->sock, buffer, bufferSize) > 0) {
      
         // copy the bytes read into the _readBuffer...
         if(numberRead > 0) {
-            _readBuffer.resize(numberRead + _readBuffer.size());
-            auto endPointer =  _readBuffer.data() + _readBuffer.size();
+            monitor->readBuffer.resize(numberRead + monitor->readBuffer.size());
+            auto endPointer =  monitor->readBuffer.data() + monitor->readBuffer.size();
             memcpy(endPointer, buffer, numberRead); // appends the buffer contents straight into the _readBuffer vector
             totalBytesRead += numberRead;
         }
         
     }
     
-    cv.notify_one();
     
     // if there is an error
     if(numberRead < 0) {
@@ -165,3 +160,9 @@ static void copyAccross(const T *from, size_t fromSize, std::vector<T> &dest) {
     memcpy(dest.data, from, fromSize); // copy the data across
    
 }*/
+
+ roboseals::TCPSocket::TCPSocket(const int port, const std::string & ipAddress)
+{
+    _context->ipAddress = ipAddress;
+    _context->port = port;
+}

@@ -5,13 +5,14 @@
 #include "RXMessageBuilder.hpp"
 
 const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
-    //std::cout << "interpret bytes... (" << std::to_string(readBuffer().size()) << " bytes)" << std::endl;
+    //std::cout << "interpret bytes... (" << std::to_string(monitor->readBuffer.size()) << " bytes)" << std::endl;
     bool headerFound = false;
 
     int ptrIndex = 0;
-    for(; ptrIndex < readBuffer().size()-1; ptrIndex++) {
+    auto monitor = context().manuallyLock();
+    for(; ptrIndex < monitor->readBuffer.size()-1; ptrIndex++) {
         // search for packet start
-        if(((uint8_t)readBuffer()[ptrIndex]) == (uint8_t) '$') {
+        if(((uint8_t)monitor->readBuffer[ptrIndex]) == (uint8_t) '$') {
             headerFound = true;
             break;
         }
@@ -25,11 +26,11 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
     const auto startMarkerIndex = ptrIndex;
 
     // get the first '$' marker in the buffered bytes
-    auto ptr = readBuffer().begin() + startMarkerIndex;
+    auto ptr = monitor->readBuffer.begin() + startMarkerIndex;
 
     size_t packlength = 0;
     bool foundEndMarker = false;
-    for(auto itr = readBuffer().begin() + startMarkerIndex; itr < readBuffer().end(); itr++) {
+    for(auto itr = monitor->readBuffer.begin() + startMarkerIndex; itr < monitor->readBuffer.end(); itr++) {
         packlength++;
         if ((*itr) == '*') {
             packlength += 2; // XXX: ensure that checksum is always 2 characters (currently not sure if it is)
@@ -41,12 +42,12 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
     if (!foundEndMarker) {
         // buffer does not contain '*' character
         return {};
-    } else if (startMarkerIndex + packlength > readBuffer().size()) {
+    } else if (startMarkerIndex + packlength > monitor->readBuffer.size()) {
         // buffer does not contain msg (including checksum, etc.)
         return {};
     }
 
-    std::string msg {readBuffer().data() + startMarkerIndex, packlength};
+    std::string msg {monitor->readBuffer.data() + startMarkerIndex, packlength};
     
     // print message
     std::cout << "uncut: " << msg << std::endl;
@@ -60,7 +61,7 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
     if(calcCheckSum != incomingChecksum) {
         std::cout << "CHECKSUMS DO NOT MATCH, expected:" << std::to_string(calcCheckSum) << "; received: " << std::to_string(incomingChecksum) << std::endl;
         // remove broken packet
-        readBuffer().erase(readBuffer().begin(), readBuffer().begin() + startMarkerIndex + packlength);
+        monitor->readBuffer.erase(monitor->readBuffer.begin(), monitor->readBuffer.begin() + startMarkerIndex + packlength);
         return {};
     }
 
@@ -70,9 +71,9 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
 
     std::vector<char> returnVal{};
     returnVal.resize(ptrIndex + packlength);
-    memcpy(returnVal.data(), readBuffer().data(), ptrIndex + packlength);
+    memcpy(returnVal.data(), monitor->readBuffer.data(), ptrIndex + packlength);
     // remove packet data from buffer
-    readBuffer().erase(readBuffer().begin(), readBuffer().begin() + startMarkerIndex + packlength);
+    monitor->readBuffer.erase(monitor->readBuffer.begin(), monitor->readBuffer.begin() + startMarkerIndex + packlength);
 
     if(msgID == "RXHRB") {
         std::cout << "HEART BEAT..." << std::endl; 

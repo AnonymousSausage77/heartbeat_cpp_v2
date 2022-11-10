@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <mutex>
 #include "AbstractTCPSocket.hpp"
+#include "Monitor.hpp"
 
 namespace roboseals
 {
@@ -20,8 +21,18 @@ namespace roboseals
 class TCPSocket : virtual public AbstractTCPSocket
 {
 public:
+
+    struct TCPState {
+        std::string ipAddress;
+        int port;
+        
+        int client_fd = 0; // connection hook
+        int sock = 0; // socket hook
+        std::vector<char> readBuffer;
+    };
+
     TCPSocket() = delete;
-    TCPSocket(const int port, const std::string &ipAddress) : _port(port), _ipAddress(ipAddress) {};
+    TCPSocket(const int port, const std::string &ipAddress);
     ~TCPSocket();
     bool attemptConnect() override;
     void attemptClose() override;
@@ -29,24 +40,17 @@ public:
     void sendBytes(const std::string &msg) override;
     void readBytes() override;
     void addListener(std::weak_ptr<Observer> &listener) override; // adds a listener for when there is data received
-    bool isConnected() const {return _connected;}; // might need changing to an api call rather than a stored bool
+    bool isConnected() const override {return true; }; // might need changing to an api call rather than a stored bool
 protected:
-    std::vector<char> &readBuffer() { return _readBuffer; }
     void updateListeners(int32_t signal, const std::string &message) const  override;
+    roboseals::Monitor<TCPState> &context() { return this->_context; }
 private:
     bool openSocket();
     bool openConnection();
     
-    int _port;
-    std::string _ipAddress;
     
-    int _client_fd = 0; // connection hook
-    int _sock = 0; // socket hook
-    bool _connected = false;
-    std::vector<char> _readBuffer;
-
-    std::mutex _socketLock;
-    std::condition_variable cv; // for controlling thread waits
+    
+    roboseals::Monitor<TCPState> _context{};
     std::vector<std::weak_ptr<Observer>> _listeners;
 
 };
