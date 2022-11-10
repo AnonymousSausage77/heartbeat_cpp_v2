@@ -4,7 +4,9 @@
 #include "RXState.hpp"
 
 namespace roboseals::RX_Message {
-
+    
+const std::string TEAM_ID = "test_id";
+    
 class RXMessageBuilder;
 
 /**
@@ -17,7 +19,7 @@ class RXMessageBuilder;
 class RXMessageFactory
 {
 public:
-    RXMessageFactory(const std::string &teamID);
+    RXMessageFactory(const std::string &teamID = TEAM_ID);
     ~RXMessageFactory();
     std::string gateMessage(const std::string& entrance, const std::string &exit);
     std::string heartbeatMessage(const double longitude, const double lat, const int systemMode, const int uavStatus);

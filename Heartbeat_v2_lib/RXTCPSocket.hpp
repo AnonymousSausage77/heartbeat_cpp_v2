@@ -23,11 +23,8 @@ public:
      *  and empty vector.
      */
     const std::vector<char> popBytes() override;
-    
 };
     
-    
 }
-
 
 #endif // RXTCPSOCKET_H

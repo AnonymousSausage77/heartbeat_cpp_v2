@@ -43,17 +43,15 @@ bool roboseals::TCPSocket::attemptConnect()
 
 void roboseals::TCPSocket::sendBytes(const char* bytes, const size_t bsize)
 {
-    auto monitor = _context.manuallyLock();
-    
-    // TODO: handle closed connection
+    // TODO: handle closed connection by making this add bytes to a queue and then having a 
+    // new thread run over that queue to send the bytes to the server, checking for timeout as that happens
     // send a message
-    send(monitor->sock, bytes, bsize, 0);
+    send(_context->sock, bytes, bsize, 0);
     
 }
 
 void roboseals::TCPSocket::sendBytes(const std::string& msg)
 {
-    auto monitor = _context.manuallyLock();
     
     // TODO: handle closed connection
     // send a message

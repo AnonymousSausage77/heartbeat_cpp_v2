@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <atomic>
 
 namespace roboseals::RX_Message {
     
@@ -24,8 +25,6 @@ inline std::string& operator<<(std::string &s, const Colour &type) {
     std::string c{1, (char)type};
     return s.append(c);
 }
-
-
 
 struct SearchObjectDetails {
     std::string id; // "R" or "N"
@@ -55,15 +54,15 @@ enum class SystemMode : unsigned int {
  */
 struct RXSystemState {
     // boat state
-    UAV_Status uavStatus;
-    SystemMode systemMode;
-    int64_t statusUpdateTimeStamp;
-    bool killed; // if true, heartbeat system will stop
+    std::atomic<UAV_Status> uavStatus;
+    std::atomic<SystemMode> systemMode;
+    std::atomic_int64_t statusUpdateTimeStamp;
+    std::atomic_bool killed; // if true, heartbeat system will stop
 
     // gps
-    double longitude;
-    double latitude;
-    int64_t gpsUpdateTimeStamp; // last time of gps update
+    std::atomic<double> longitude;
+    std::atomic<double> latitude;
+    std::atomic_int64_t gpsUpdateTimeStamp; // last time of gps update
 };
 
 }

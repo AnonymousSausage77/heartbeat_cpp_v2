@@ -6,9 +6,9 @@
 
 using namespace roboseals::RooCOMMS;
 
-roboseals::RX_Message::RXController::RXController(std::shared_ptr<RXMessageFactory> &factory, std::shared_ptr<AbstractTCPSocket> &socket, 
+roboseals::RX_Message::RXController::RXController(std::shared_ptr<AbstractTCPSocket> &socket, 
         std::shared_ptr<AbstractRCClientAdaptor> &rcAdaptor) 
-            : _messageFactory(factory), _TCPsocket(socket), _rcAdaptor(rcAdaptor)
+            : _TCPsocket(socket), _rcAdaptor(rcAdaptor)
 {
     this->_tcpObserver = std::make_shared<Observer>([](int32_t signal, const std::string &message)
         {
@@ -23,7 +23,7 @@ void roboseals::RX_Message::RXController::start()
         // talk to CANBUS
         _rcAdaptor->updateState(this->_state);
         // TODO: send state heartbeat in different thread
-        auto messages = _rcAdaptor->fetchMessagesToBeSent(*_messageFactory);
+        auto messages = _rcAdaptor->fetchMessagesToBeSent(_messageFactory);
         
         // talk to TCP server
         for (auto m : messages) {

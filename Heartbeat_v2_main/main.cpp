@@ -15,17 +15,18 @@ int main()
     std::cout << roboseals::RX_Message::currentDateTime() << std::endl;
     
     roboseals::RX_Message::RXSystemState state;
-    auto factory = std::make_shared<roboseals::RX_Message::RXMessageFactory>(TEAM_ID);
     // TODO: automatically reconnect to socket if connection is lost
     auto socket = std::make_shared<roboseals::RX_Message::RXTCPSocket>(PORT, ADDRESS);
     //TODO: implement rcAdaptor
    // auto rcAdaptor = std::make_shared<?>;
     
     
-    socket->attemptConnect();
+    if(socket->attemptConnect()) {
+        std::cout << "success!" << std::endl;
+    }
     
-    //roboseals::RX_Message::RXController controller{socket, factory, rcAdaptor}; // rcAdaptor hasnt been implemented yet
-    roboseals::RX_Message::RXHeartbeatController heartbeatController{state, socket, factory};
+    //roboseals::RX_Message::RXController controller{socket, rcAdaptor}; // rcAdaptor hasnt been implemented yet
+    roboseals::RX_Message::RXHeartbeatController heartbeatController{state, socket};
     heartbeatController.start();
     
     

@@ -4,10 +4,13 @@
 #include <thread>
 #include <mutex>
 #include <functional>
+#include <iostream>
 
 namespace roboseals
 {
 
+static int locks = 0;
+    
 // from: https://stackoverflow.com/questions/12647217/making-a-c-class-a-monitor-in-the-concurrent-sense
 template<class T>
 class Monitor
@@ -18,7 +21,8 @@ public:
 
     struct Monitor_helper
     {
-        Monitor_helper(Monitor* mon) : m_mon(mon), m_ul(mon->m_lock) {}
+        Monitor_helper(Monitor* mon) : m_mon(mon), m_ul(mon->m_lock) { locks++; std::cout << "lcked "<< locks << std::endl; }
+        ~Monitor_helper() { std::cout << "unlcked " << locks << std::endl; locks--; };
         T* operator->() { return &m_mon->m_cl;}
         Monitor* m_mon;
         std::unique_lock<std::mutex> m_ul;

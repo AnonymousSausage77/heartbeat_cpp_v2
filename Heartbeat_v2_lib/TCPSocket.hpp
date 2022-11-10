@@ -2,8 +2,6 @@
 #define TCPSOCKET_HPP
 
 #include <vector>
-#include <condition_variable>
-#include <mutex>
 #include "AbstractTCPSocket.hpp"
 #include "Monitor.hpp"
 
