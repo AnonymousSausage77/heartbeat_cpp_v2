@@ -6,8 +6,8 @@
 #include "RXHeartbeatController.hpp"
 
 #define TEAM_ID "teamid"
-#define PORT 2000
-#define ADDRESS "192.168.1.2"
+#define PORT 2022
+#define ADDRESS "127.0.0.1"
  
 int main()
 {

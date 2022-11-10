@@ -64,8 +64,19 @@ bool roboseals::TCPSocket::openSocket()
 {    
     std::cout << "Opening Socket..." << std::endl;
     
+    #ifdef __WIN32__
+    WSADATA wsaData;
+    WORD wVersionRequested = MAKEWORD(2, 2);
+    int winSetupResult = WSAStartup(wVersionRequested, &wsaData);
+    if(winSetupResult != 0) {
+        // erorr in config
+        std::cout << "Error in winsock initalisation: " << winSetupResult << std::endl;
+    }
+    #endif
+    
     if ((_context->sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        printf("\n Socket creation error \n");
+        std::cout << "\n Socket creation error: " << WSAGetLastError() << std::endl;
+
         return false;
     }
     return true;
