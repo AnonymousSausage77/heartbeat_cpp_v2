@@ -3,7 +3,6 @@
 #include <iostream>
 #include <stdint.h>
 
-
 using namespace roboseals::RooCOMMS;
 
 roboseals::RX_Message::RXController::RXController(std::shared_ptr<AbstractTCPSocket> &socket, 
@@ -33,12 +32,12 @@ void roboseals::RX_Message::RXController::start()
             _TCPsocket->sendBytes(m);
         }
         
-        /*auto receivedMsg = _TCPsocket->popBytes();
+        auto receivedMsg = _TCPsocket->popBytes();
         if (receivedMsg.size() > 0) {
             // XXX: DOESNT TERMINATE:
             std::string msg{receivedMsg.data(), receivedMsg.size()};
             std::cout << "\n\tmsg received: " << msg << std::endl;
-        }*/
+        }
         
         //if(this->state().killed) {
             // close system

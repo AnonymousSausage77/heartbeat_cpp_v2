@@ -35,6 +35,7 @@ private:
 
 inline uint16_t checksum(const std::string &s)
 {
+    
     uint16_t cs = s.at(0);
     for (auto itr = s.begin() + 1; itr < s.end(); itr++) {
         cs ^= *itr;

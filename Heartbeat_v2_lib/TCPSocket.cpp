@@ -146,7 +146,7 @@ void roboseals::TCPSocket::readBytes()
     // delay interval
     timeval t;
     t.tv_sec = 0;
-    t.tv_usec = 30;
+    t.tv_usec = 60;
     
     auto socketStatus = select(monitor->sock, &rfd, nullptr, nullptr, &t);
     
@@ -157,7 +157,7 @@ void roboseals::TCPSocket::readBytes()
         std::cout << "SOCKET READ TIMED OUT" << std::endl;
         return;
     }
-    std::cout << "SOCKET STATUS: " << socketStatus << std::endl;
+  //  std::cout << "SOCKET STATUS: " << socketStatus << std::endl;
     
 
     #ifdef __WIN32__
@@ -168,19 +168,20 @@ void roboseals::TCPSocket::readBytes()
     std::cout << "NUM BYTES: " << numberRead << std::endl;
     
     if(numberRead < 0) {
+        // likely a disconnection
         std::cout << "ERROR READING BYTES" << std::endl;
-    }
-
-    // copy the bytes read into the _readBuffer...
-    if(numberRead > 0) {
+        
+        // TODO: close socket and attempt reconnect
+        
+    } else if(numberRead > 0) {
         auto &readBuffer = monitor->readBuffer;
         auto originalSize = readBuffer.size();
         readBuffer.resize(numberRead + readBuffer.size());
         auto endPointer =  readBuffer.data() + originalSize;
         memcpy(endPointer, buffer, numberRead); // appends the buffer contents straight into the _readBuffer vector
         totalBytesRead += numberRead;
-        std::string s {buffer, numberRead};
-        std::cout << s << std::endl;
+        std::string s {buffer, numberRead}; // TESTING
+        std::cout << s << std::endl; // TESTING
     }
     
     // update listeners that bytes have been read
@@ -255,6 +256,6 @@ void roboseals::TCPSocket::runDriver()
             readBytes();
             writeBytes();
         }
-        std::this_thread::sleep_for(2000ms);
+        std::this_thread::sleep_for(30ms);
     }
 }

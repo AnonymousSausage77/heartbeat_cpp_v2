@@ -12,6 +12,7 @@
  
 int main()
 {
+    
     std::cout << "REMEMBER: Set your timezone to correct timezone!" << std::endl;
     std::cout << roboseals::RX_Message::currentDateTime() << std::endl;
     
@@ -31,7 +32,7 @@ int main()
     heartbeatController.start();
     
     
-    while(true) {} // TODO: simply for testing purposes
+    //while(true) {} // TODO: simply for testing purposes
     
     // the thread will become trapped in the below function until the system is stopped
     controller.start(); // starts the loop for reading and writing packets

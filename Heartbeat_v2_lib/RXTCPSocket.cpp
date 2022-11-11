@@ -9,10 +9,18 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
     bool headerFound = false;
 
     int ptrIndex = 0;
+    // lock socket state from other threads
     auto monitor = context().manuallyLock();
-    for(; ptrIndex < monitor->readBuffer.size()-1; ptrIndex++) {
+    auto currentBufferSize = monitor->readBuffer.size();
+    // no bytes to read
+    if(currentBufferSize <= 0) {
+        return {};
+    }
+    std::cout << "pop Buffer size: " << currentBufferSize << std::endl;
+    for(; ptrIndex < currentBufferSize; ptrIndex++) {
         // search for packet start
-        if(((uint8_t)monitor->readBuffer[ptrIndex]) == (uint8_t) '$') {
+        if((uint8_t) monitor->readBuffer.at(ptrIndex) == (uint8_t) '$') {
+            std::cout << "VAL:" << monitor->readBuffer.at(ptrIndex) << std::endl; 
             headerFound = true;
             break;
         }
@@ -23,6 +31,7 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
         return {};
     }
     
+    // place of the '$'
     const auto startMarkerIndex = ptrIndex;
 
     // get the first '$' marker in the buffered bytes
@@ -50,28 +59,29 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
     std::string msg {monitor->readBuffer.data() + startMarkerIndex, packlength};
     
     // print message
-    std::cout << "uncut: " << msg << std::endl;
-    msg = msg.substr(startMarkerIndex, startMarkerIndex + packlength);
-    std::cout << "cut: " << msg << std::endl;
-
+    std::cout << "uncut: \t" << msg << std::endl;
+    // XXX: check that this is checksumming the correct bytes
+    std::string package = msg.substr(1, packlength - 2 /*for '*' and '$' */ - 2 /* for '$cs' */); // between $ and *
+    std::cout << "cut: \t" << package << std::endl;
+    std::string incomingChecksum {msg.substr(packlength - 2, 2)};
+    std::cout << "cs: \t" << incomingChecksum << std::endl;
     // validate the checksum
-    const uint16_t calcCheckSum = checksum(msg.substr(0, packlength-2)); // XXX: check that this is checksumming the correct bytes
-    const uint16_t incomingChecksum = *(ptr + packlength-2); // XXX: check this is the correct byte
+    const std::string calcCheckSum = checksumHex(package); 
 
     if(calcCheckSum != incomingChecksum) {
-        std::cout << "CHECKSUMS DO NOT MATCH, expected:" << std::to_string(calcCheckSum) << "; received: " << std::to_string(incomingChecksum) << std::endl;
+        std::cout << "CHECKSUMS DO NOT MATCH, expected:" << calcCheckSum << "; received: " << incomingChecksum << std::endl;
         // remove broken packet
         monitor->readBuffer.erase(monitor->readBuffer.begin(), monitor->readBuffer.begin() + startMarkerIndex + packlength);
+        
         return {};
     }
 
     // handle packet based on msg id
-    std::string msgID {*(ptr + 1)};
-    msgID = msgID.substr(5);
+    std::string msgID = msg.substr(1, 5);
 
     std::vector<char> returnVal{};
-    returnVal.resize(ptrIndex + packlength);
-    memcpy(returnVal.data(), monitor->readBuffer.data(), ptrIndex + packlength);
+    returnVal.resize(packlength);
+    memcpy(returnVal.data(), monitor->readBuffer.data(), packlength);
     // remove packet data from buffer
     monitor->readBuffer.erase(monitor->readBuffer.begin(), monitor->readBuffer.begin() + startMarkerIndex + packlength);
 
