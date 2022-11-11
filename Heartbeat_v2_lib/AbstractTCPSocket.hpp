@@ -23,10 +23,10 @@ class AbstractTCPSocket
     virtual bool attemptConnect() = 0;
     virtual void attemptClose() = 0;
     virtual const std::vector<char> popBytes() = 0; // removes bytes from the buffer and returns them; returns an empty array if no bytes are found
-    virtual void readBytes() = 0;
     virtual void addListener(std::weak_ptr<Observer>  &listener) = 0; // adds a listener for when there is data received
 
     protected:
+    virtual void readBytes() = 0;
     virtual void updateListeners(int32_t signal, const std::string &message) const = 0;
 
 

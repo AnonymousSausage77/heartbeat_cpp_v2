@@ -21,8 +21,8 @@ public:
 
     struct Monitor_helper
     {
-        Monitor_helper(Monitor* mon) : m_mon(mon), m_ul(mon->m_lock) { locks++; std::cout << "lcked "<< locks << std::endl; }
-        ~Monitor_helper() { std::cout << "unlcked " << locks << std::endl; locks--; };
+        Monitor_helper(Monitor* mon) : m_mon(mon), m_ul(mon->m_lock) { locks++; /*std::cout << "lcked "<< locks << std::endl;*/ }
+        ~Monitor_helper() { /*std::cout << "unlcked " << locks << std::endl;*/ locks--; };
         T* operator->() { return &m_mon->m_cl;}
         Monitor* m_mon;
         std::unique_lock<std::mutex> m_ul;

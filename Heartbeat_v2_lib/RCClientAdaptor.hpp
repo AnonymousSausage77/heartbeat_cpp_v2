@@ -16,8 +16,8 @@ public:
     void updateState(roboseals::RX_Message::RXSystemState &state) override;
     std::vector<std::string> fetchMessagesToBeSent(roboseals::RX_Message::RXMessageFactory &factory) override;
 private:
-    void runGPSPackets();
-    void runSuccessPacket();
+    //void runGPSPackets();
+    //void runSuccessPacket();
 
 };
 

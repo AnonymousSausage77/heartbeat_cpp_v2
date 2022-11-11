@@ -38,8 +38,13 @@ void roboseals::RX_Message::RXHeartbeatController::run()
 
 void roboseals::RX_Message::RXHeartbeatController::sendHeartbeat()
 {
+    std::cout << "create heartbeat" << std::endl;
     auto message = this->_messageFactory.heartbeatMessage(_state.latitude, _state.longitude, 
         static_cast<int>(_state.systemMode.load()), 
         static_cast<int>(_state.uavStatus.load()));
+        
+    std::cout << "send heartbeat" << std::endl;
     this->_socket->sendBytes(message);
+    
+    std::cout << "sent heartbeat" << std::endl;
 }
