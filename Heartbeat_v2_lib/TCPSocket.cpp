@@ -100,8 +100,11 @@ bool roboseals::TCPSocket::openSocket()
     #endif
     
     if ((_context.getThreadUnsafeAccess().sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        #ifdef __WIN32__
         std::cout << "\n Socket creation error: " << WSAGetLastError() << std::endl;
-
+        #else
+        std::cout << "\n Socket creation error!" << std::endl;
+        #endif
         return false;
     }
     return true;

@@ -5,10 +5,10 @@
 
 using namespace roboseals::RooCOMMS;
 
-namespace roboseals::RooCOMMS::test
+namespace roboseals::RooCOMMS
 {
 
-class RCClientAdaptor : public AbstractRCClientAdaptor
+class RCClientAdaptor : virtual public AbstractRCClientAdaptor
 {
 public:
     RCClientAdaptor();
@@ -16,8 +16,6 @@ public:
     void updateState(roboseals::RX_Message::RXSystemState &state) override;
     std::vector<std::string> fetchMessagesToBeSent(roboseals::RX_Message::RXMessageFactory &factory) override;
 private:
-    //void runGPSPackets();
-    //void runSuccessPacket();
 
 };
 

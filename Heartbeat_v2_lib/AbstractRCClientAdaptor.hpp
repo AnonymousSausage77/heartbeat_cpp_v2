@@ -10,7 +10,10 @@ namespace roboseals::RooCOMMS {
     
     /**
      * @class AbstractRCClientAdaptor
-     * @author John Bures
+     * @author John Bures#ifndef RCCLIENTADAPTOR_HPP
+#define RCCLIENTADAPTOR_HPP
+
+#include "AbstractRCClient
      * @date 11/07/22
      * @file AbstractRCClientAdaptor.hpp
      * @brief Interface for the RooComms CANBUS network. This interface hides the implementation of fetching messages from the CANBUS network
