@@ -42,11 +42,19 @@ void roboseals::TCPSocket::attemptClose() {
     }
 }
 
-// not thread safe
+// also reconnect (thread safe)
 bool roboseals::TCPSocket::attemptConnect()
 {
+
+    auto monitor = this->_context.manuallyLock();
+    // first connection
+    monitor->sock = 0;
+    monitor->client_fd = 0;
+    monitor->writeBuffer = {};
+    
     this->_isConnected = openSocket() && openConnection();
     return _isConnected;
+
 }
 
 void roboseals::TCPSocket::sendBytes(const char* bytes, const size_t bsize)
@@ -76,6 +84,7 @@ void roboseals::TCPSocket::sendBytes(const std::string& msg)
     sendBytes(msg.c_str(), msg.size());
 }
 
+// not thread safe
 bool roboseals::TCPSocket::openSocket() 
 {    
     std::cout << "Opening Socket..." << std::endl;
@@ -90,7 +99,7 @@ bool roboseals::TCPSocket::openSocket()
     }
     #endif
     
-    if ((_context->sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((_context.getThreadUnsafeAccess().sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         std::cout << "\n Socket creation error: " << WSAGetLastError() << std::endl;
 
         return false;
@@ -98,26 +107,26 @@ bool roboseals::TCPSocket::openSocket()
     return true;
 }
 
+// not thread safe
 bool roboseals::TCPSocket::openConnection()
 {
-    auto monitor = _context.manuallyLock();
     
     struct sockaddr_in serv_addr;
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(monitor->port);
+    serv_addr.sin_port = htons(_context.getThreadUnsafeAccess().port);
  
     // Convert IPv4 and IPv6 addresses from text to binary
     // form
     // establishing connection...
-    if (inet_pton(AF_INET, monitor->ipAddress.c_str(), &serv_addr.sin_addr)
+    if (inet_pton(AF_INET, _context.getThreadUnsafeAccess().ipAddress.c_str(), &serv_addr.sin_addr)
         <= 0) {
         printf("\nInvalid address/ Address not supported \n");
         return false;
     }
  
     std::cout << "Attempting connection..." << std::endl;
-    if ((monitor->client_fd
-         = connect(monitor->sock, (struct sockaddr*)&serv_addr,
+    if ((_context.getThreadUnsafeAccess().client_fd
+         = connect(_context.getThreadUnsafeAccess().sock, (struct sockaddr*)&serv_addr,
                    sizeof(serv_addr)))
         < 0) {
         printf("\nConnection Failed \n");
@@ -152,6 +161,7 @@ void roboseals::TCPSocket::readBytes()
     
     if(socketStatus < 0) {
         std::cout << "SOCKET STATUS ERROR!" << std::endl;
+        this->_isConnected = false;
         return;
     } else if (socketStatus == 0) {
         std::cout << "SOCKET READ TIMED OUT" << std::endl;
@@ -170,7 +180,7 @@ void roboseals::TCPSocket::readBytes()
     if(numberRead < 0) {
         // likely a disconnection
         std::cout << "ERROR READING BYTES" << std::endl;
-        
+        this->_isConnected = false;
         // TODO: close socket and attempt reconnect
         
     } else if(numberRead > 0) {
@@ -255,6 +265,8 @@ void roboseals::TCPSocket::runDriver()
         if (this->isConnected()) {
             readBytes();
             writeBytes();
+        } else {
+            this->attemptConnect();
         }
         std::this_thread::sleep_for(30ms);
     }

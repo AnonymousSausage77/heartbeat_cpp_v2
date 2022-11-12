@@ -4,6 +4,7 @@
 #include <string>
 #include <stdio.h>
 #include <sstream>
+#include <iomanip>
 
 namespace roboseals::RX_Message {
 
@@ -43,16 +44,14 @@ inline uint16_t checksum(const std::string &s)
     return cs;
 }
 
-inline std::string checksumHex(const std::string &s)
+inline std::string checksumHex(const std::string &s, int length = 2)
 {
     auto cs = checksum(s);
 
     // convert to hex
     std::stringstream ss;
-    ss<< std::hex << cs;
-    std::string res ( ss.str() );
-
-    return res;
+    ss<< std::hex << std::uppercase <<std::setfill('0') << std::setw(length) << cs;
+    return ss.str();
 }
 
 }

@@ -88,7 +88,7 @@ const std::vector<char> roboseals::RX_Message::RXTCPSocket::popBytes() {
     if(msgID == "RXHRB") {
         std::cout << "HEART BEAT..." << std::endl; 
     } else {
-        std::cout << "other... " << msgID << std::endl;
+        std::cout << "PACKET ID: " << msgID << std::endl;
         return returnVal;
     }
     return {}; // dont return heartbeats
