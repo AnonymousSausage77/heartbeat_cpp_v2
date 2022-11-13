@@ -261,7 +261,6 @@ void roboseals::TCPSocket::writeBytes()
 
 void roboseals::TCPSocket::runDriver()
 {
-    using namespace std::chrono_literals;
     while (true) {
         std::cout << "Sending: " << this->_context->writeBuffer.size() << std::endl;
         std::cout << "Reading: " << this->_context->readBuffer.size() << std::endl;
@@ -270,7 +269,8 @@ void roboseals::TCPSocket::runDriver()
             writeBytes();
         } else {
             this->attemptConnect();
-        }
+        
+        using namespace std::chrono_literals;
         std::this_thread::sleep_for(30ms);
     }
 }
