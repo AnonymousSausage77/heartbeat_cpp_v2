@@ -38,6 +38,7 @@ void roboseals::TCPSocket::attemptClose() {
     auto monitor = _context.manuallyLock();
     
     if(isConnected()) {
+        std::cout << "closing socket..." << std::endl;
         close(monitor->client_fd);
     }
 }
@@ -64,7 +65,7 @@ void roboseals::TCPSocket::sendBytes(const char* bytes, const size_t bsize)
     // send a message
     auto monitor = this->_context.manuallyLock();
 
-    std::cout << "sendBytes(" << bsize << ")" << std::endl;
+   // std::cout << "sendBytes(" << bsize << ")" << std::endl;
     
     auto &writeBuffer = monitor->writeBuffer;
     auto currentWriteBufferSize = writeBuffer.size();
@@ -74,7 +75,7 @@ void roboseals::TCPSocket::sendBytes(const char* bytes, const size_t bsize)
             bytes, 
             bsize);
             
-    std::cout << "sendBytes(" << writeBuffer.size() << ")" << std::endl;
+    //std::cout << "sendBytes(" << writeBuffer.size() << ")" << std::endl;
 
 }
 
@@ -126,6 +127,8 @@ bool roboseals::TCPSocket::openConnection()
         printf("\nInvalid address/ Address not supported \n");
         return false;
     }
+    
+    std::cout << "binary ip: " << &serv_addr.sin_addr << std::endl;
  
     std::cout << "Attempting connection..." << std::endl;
     if ((_context.getThreadUnsafeAccess().client_fd
@@ -167,7 +170,7 @@ void roboseals::TCPSocket::readBytes()
         this->_isConnected = false;
         return;
     } else if (socketStatus == 0) {
-        std::cout << "SOCKET READ TIMED OUT" << std::endl;
+       // std::cout << "SOCKET READ TIMED OUT" << std::endl;
         return;
     }
   //  std::cout << "SOCKET STATUS: " << socketStatus << std::endl;
@@ -193,8 +196,8 @@ void roboseals::TCPSocket::readBytes()
         auto endPointer =  readBuffer.data() + originalSize;
         memcpy(endPointer, buffer, numberRead); // appends the buffer contents straight into the _readBuffer vector
         totalBytesRead += numberRead;
-        std::string s {buffer, numberRead}; // TESTING
-        std::cout << s << std::endl; // TESTING
+        //std::string s {buffer, numberRead}; // TESTING
+        //std::cout << s << std::endl; // TESTING
     }
     
     // update listeners that bytes have been read
@@ -229,48 +232,62 @@ static void copyAccross(const T *from, size_t fromSize, std::vector<T> &dest) {
 
 void roboseals::TCPSocket::writeBytes()
 {
+    std::cout << "locking" << std::endl;
     auto monitor = this->context().manuallyLock();
-    const size_t maxBufferSize = 1024;
-    
+
+    if(monitor->writeBuffer.size() <= 0) {
+        return;
+    } 
+   const size_t maxBufferSize = 1024;
+    std::cout << "locked" << std::endl;
     //std::cout << std::endl << std::endl << "TOWRTING " << monitor->writeBuffer.size() << " BYTES (" << monitor->writeBuffer.size() << ")"  << std::endl;
     //std::cout << "TEST" << std::endl;
   
   
     // XXX: should send 1024 as max buffer size
-    while (monitor->writeBuffer.size() > 0) {
-        size_t bsize = monitor->writeBuffer.size();
-        
-        std::cout << "\n\nWRITING " << bsize << " BYTES (" << monitor->writeBuffer.size() << ")"  << std::endl;
-        
-        std::vector<char> bytes{monitor->writeBuffer.begin(), monitor->writeBuffer.begin() + bsize};
-        
-        if (bsize > bytes.size()) {
-            throw std::invalid_argument("Not enough bytes in vector to send!");
-        }
-        // send the message through the socket
-        send(monitor->sock, bytes.data(), bsize, 0);
-        
-        // move the un-sent bytes to the start of the vector
-        memcpy(monitor->writeBuffer.data(), monitor->writeBuffer.data() + bsize, bsize);
-        // erase a number of bytes that have been sent from the end
-        //bytes.erase(bytes.begin() + bsize, bytes.end());
-        // resize the array
-        monitor->writeBuffer.resize(monitor->writeBuffer.size() - bsize); 
+    size_t bsize = monitor->writeBuffer.size();
+    
+    std::cout << "\n\nWRITING " << bsize << " BYTES (" << monitor->writeBuffer.size() << ")"  << std::endl;
+    
+    std::vector<char> &bytes = monitor->writeBuffer;
+ //   std::vector<char> bytes{monitor->writeBuffer.begin(), monitor->writeBuffer.end()};
+    
+    
+    if (bsize > bytes.size()) {
+        throw std::invalid_argument("Not enough bytes in vector to send!");
     }
+    
+    
+    char *sentBytes = bytes.data();
+    
+    std::string s {sentBytes, bsize};
+    std::cout << "WRITING TO SOCKET: " << s << std::endl;
+    
+    // send the message through the socket
+    send(monitor->sock, sentBytes, bsize, 0);
+    
+    // move the un-sent bytes to the start of the vector
+    memcpy(monitor->writeBuffer.data(), monitor->writeBuffer.data() + bsize, bsize);
+    // erase a number of bytes that have been sent from the end
+    
+    // resize the array
+    monitor->writeBuffer.resize(monitor->writeBuffer.size() - bsize); 
+
 }
 
 void roboseals::TCPSocket::runDriver()
 {
     while (true) {
-        std::cout << "Sending: " << this->_context->writeBuffer.size() << std::endl;
-        std::cout << "Reading: " << this->_context->readBuffer.size() << std::endl;
+        //std::cout << "Sending: " << this->_context->writeBuffer.size() << std::endl;
+        //std::cout << "Reading: " << this->_context->readBuffer.size() << std::endl;
         if (this->isConnected()) {
-            readBytes();
+            //readBytes();
             writeBytes();
         } else {
             this->attemptConnect();
         
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(30ms);
+        }
     }
 }

@@ -80,7 +80,7 @@ std::string RXMessageBuilder::checksumHex(std::string &s) const
 std::string RXMessageBuilder::get()
 {
     auto cs = checksumHex(this->_message);
-    std::string val = "$" + this->_message + "*" + cs + "\n";
+    std::string val = "$" + this->_message + "*" + cs + "\r\n";
         // assumes "\n" should hopefully be transformed into <cr><lf>
         // TODO: verify assumption
     this->_message = "";

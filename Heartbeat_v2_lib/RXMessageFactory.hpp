@@ -5,7 +5,7 @@
 
 namespace roboseals::RX_Message {
     
-const std::string TEAM_ID = "test_id";
+const std::string TEAM_ID = "ASAU";
     
 class RXMessageBuilder;
 

@@ -109,7 +109,7 @@ std::string RX_Message::RXMessageFactory::uavSearchReportMessage(const SearchObj
 
 
 
-RX_Message::RXMessageBuilder &RX_Message::RXMessageFactory::header(const std::string &msgID)
+RX_Message::RXMessageBuilder &RX_Message::RXMessageFactory::header(const std::string &msgID = TEAM_ID)
 {
     const std::string timeString = roboseals::RX_Message::currentDateTime();
     const std::string date = timeString.substr(0, timeString.find(","));
