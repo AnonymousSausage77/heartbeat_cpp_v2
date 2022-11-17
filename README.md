@@ -15,8 +15,10 @@ Unfortunately this means a few steps are in order to get this running.
 In Heartbeat_v2_main settings:
 
   - add '../Heartbeat_v2_lib' to "Compiler" > "include paths" in Codelite
-  - add 'Heartbeat_v2_lib;pthread' to "Linker" > "Libraries"
+  - add 'Heartbeat_v2_lib;pthread;ws2_32' to "Linker" > "Libraries"
   - add '$(WorkspacePath)/build-$(WorkspaceConfiguration)/lib' to "Linker" > "Libraries Search Path"
+  - add '-std=c++17' to c++ compiler options
+
 
   
 Additionaly, this should be run with the c++ 17 copiler option enabled
