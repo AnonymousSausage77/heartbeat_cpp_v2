@@ -9,6 +9,7 @@ roboseals::RX_Message::RXController::RXController(std::shared_ptr<AbstractTCPSoc
         std::shared_ptr<AbstractRCClientAdaptor> &rcAdaptor) 
             : _TCPsocket(socket), _rcAdaptor(rcAdaptor)
 {
+    // TODO: implement messages/actions when errors or stuff is read by the 
     this->_tcpObserver = std::make_shared<Observer>([](int32_t signal, const std::string &message)
         {
             // TODO: Add listener to TCP socket to handle acknowledgements
@@ -19,11 +20,13 @@ roboseals::RX_Message::RXController::RXController(std::shared_ptr<AbstractTCPSoc
 
 void roboseals::RX_Message::RXController::start() 
 {
+    
     this->_isRunning = true;
     while (_isRunning) {
         // talk to CANBUS
+        // NOT NECESSARY: provide _state to adaptor at the beginning (_state is thread safe)
         _rcAdaptor->updateState(this->_state);
-        // TODO: send state heartbeat in different thread
+        
         auto messages = _rcAdaptor->fetchMessagesToBeSent(_messageFactory);
         
         // talk to TCP server
@@ -39,10 +42,11 @@ void roboseals::RX_Message::RXController::start()
             std::cout << "\n\tmsg received: " << msg << std::endl;
         }
         
-        //if(this->state().killed) {
+        if(this->state().killed) {
             // close system
-        //    stop();
-        //}
+            stop();
+            this->_isRunning = false;
+        }
     }
 }
 

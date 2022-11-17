@@ -50,7 +50,7 @@ enum class SystemMode : unsigned int {
  * @date 11/07/22
  * @file RXState.hpp
  * @brief The internal model of the Heartbeat system. Each heartbeat message is built from the data held within an instantiation of this
- *  struct.
+ *  struct. All variables in this struct are atomic and thus thread safe.
  */
 struct RXSystemState {
     // boat state

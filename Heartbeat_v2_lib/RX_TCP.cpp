@@ -14,9 +14,7 @@
 
 std::optional<std::string> roboseals::resolveHost(const std::string &ipHostAddress) {
     WSADATA wsdata;
-
     addrinfo hints, *res;
-
     WSAStartup (MAKEWORD (2, 2), &wsdata);
 
     memset(&hints, 0, sizeof hints);
@@ -25,14 +23,13 @@ std::optional<std::string> roboseals::resolveHost(const std::string &ipHostAddre
     hints.ai_socktype   = SOCK_STREAM;
     hints.ai_protocol   = IPPROTO_TCP;
 
+    // checks if the DNS host can be resolved
     if (getaddrinfo(ipHostAddress.c_str(), NULL, &hints, &res) != 0){
         std::cout << "could not resolve DNS host " << ipHostAddress << std::endl;
-        return {};
+        return {}; // cannot be resolved
         
     }
 
-    auto ip =  inet_ntoa(((sockaddr_in *) res -> ai_addr) -> sin_addr);
-        
-    std::cout << "IP: " << ip << std::endl;    
-    return ip;
+    // gets the ip address
+    return inet_ntoa(((sockaddr_in *) res -> ai_addr) -> sin_addr);
 }

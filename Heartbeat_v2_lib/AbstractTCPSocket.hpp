@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 #include <vector>
-#include "Observer.hpp"
 #include <memory>
+#include "Observer.hpp"
 
 namespace roboseals
 {
@@ -12,11 +12,20 @@ namespace roboseals
 const inline int32_t ERROR_SIGNAL = -1;
 const inline int32_t DATA_RECEIVED_SIGNAL = 0;
     
+    
+    /**
+     * @class AbstractTCPSocket
+     * @author John Bures
+     * @date 17/11/2022
+     * @file AbstractTCPSocket.hpp
+     * @brief provides a generic interface for TCP clients; this is fit for general purpose, not locked to the robotX 
+     * competition.
+     */
 class AbstractTCPSocket 
 {
     public:
-    AbstractTCPSocket();
-    ~AbstractTCPSocket();
+    AbstractTCPSocket() {};
+    ~AbstractTCPSocket() {};
     virtual void sendBytes(const char *bytes, const size_t bsize) = 0; // sends data to the server
     virtual void sendBytes(const std::string &msg) = 0;
     virtual bool isConnected() const = 0; // checks if the socket is connected

@@ -9,8 +9,9 @@
 #include <time.h>
 namespace roboseals::RX_Message {
     
-// need to make sure the clock is set in local time
-// Get current date/time, format is ddMMyy,HHmmss
+/**
+ * @brief Gets the current time as a string in the format of "ddMMyy,HHmmss"
+ */
 inline const std::string currentDateTime() {
     time_t now = time(0); 
     struct tm tstruct;
@@ -22,6 +23,7 @@ inline const std::string currentDateTime() {
 
     return buf;
 }
+
 }
 
 #endif // TIMECONVERTER_H

@@ -19,6 +19,7 @@ namespace roboseals::RX_Message{
  * @file RXController.hpp
  * @brief Directs the movement of packets from the RooCOMMS CANBUS network to the Technical Director's network. This class
  *  maintains an internal model of the current boat (stored in '_state'), updating it as changes come in from the CANBUS.
+ * TODO: this class is largly incomplete because we changed last minute to only do the basic, laptop-based heartbeat
  */
 class RXController {
 public:

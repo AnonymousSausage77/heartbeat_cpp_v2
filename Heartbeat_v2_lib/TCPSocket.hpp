@@ -17,8 +17,12 @@ namespace roboseals
  * @author John Bures 
  * @date 11/07/22
  * @file TCPSocket.hpp
- * @brief A virtual socket that defines most of the functionality for the TCP socket. This is not specific to the RobotX challenge, however,
+ * @brief A virtual socket that implements most of the functionality for the TCP socket. This is not specific to the RobotX challenge, however,
  *  and is reusable in other situations. It is threadsafe (unless recorded elsewhere).
+ * 
+ * XXX: this needs changing because currently reading and writing are handled in the same thread. Currently,
+ * when reading packets in, if there are no packets to receive, it will hang the thread, blocking the send
+ * function from sending packets. As such, currently the reading code is commented out.
  */
 class TCPSocket : virtual public AbstractTCPSocket
 {

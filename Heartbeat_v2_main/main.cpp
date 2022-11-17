@@ -12,9 +12,9 @@
 #include <chrono>
 
 #define TEAM_ID "USAU"
-#define PORT 12345 // ?
-#define ADDRESS "robot.server" // ??
-//#define ADDRESS "google.com"
+#define PORT 12345
+#define ADDRESS "robot.server" 
+
 int main()
 {
     
@@ -26,38 +26,31 @@ int main()
     
     std::cout << "attempting to resolve hostname..." << std::endl;
     
+    // resolve the DNS server into an ip address
     std::optional<std::string> ipAddress = roboseals::resolveHost(ADDRESS);
     
-    
+    // checks the DNS server resolution
     if(!ipAddress) {
         std::cout << "NO RESOLVED IP: CLOSING..." << std::endl;
-        ipAddress  = {"192.168.200.222"};
-       // using namespace std::chrono_literals;
-        //std::this_thread::sleep_for(1s);
-        //return -1;
+        return;
     }
     
-    std::cout << "RESOLVED_IP: " << ipAddress.value() << std::endl;
+    std::cout << "SUCCESSFULLY RESOLVED_IP: " << ipAddress.value() << std::endl;
     
-    
-    std::shared_ptr<roboseals::AbstractTCPSocket> socket = std::make_shared<roboseals::RX_Message::RXTCPSocket>(PORT, *ipAddress);
-    
+    // connect up state
     roboseals::RX_Message::RXSystemState state;
     roboseals::RX_Message::test::RandomStateGenerator testGen{state};
     
-    //roboseals::RX_Message::RXController controller{socket, rcAdaptor}; // rcAdaptor hasnt been implemented yet
+    // connect to ip address
+    std::shared_ptr<roboseals::AbstractTCPSocket> socket = std::make_shared<roboseals::RX_Message::RXTCPSocket>(PORT, *ipAddress);
+    //roboseals::RX_Message::RXController controller{socket, rcAdaptor}; // TODO: rcAdaptor hasnt been implemented yet
     roboseals::RX_Message::RXHeartbeatController heartbeatController{state, socket};
     heartbeatController.start();
 
+    while(true) {} // TODO: simply for testing purposes
     
-    
-        using namespace std::chrono_literals;
-        std::this_thread::sleep_for(15s);
-    
-    //while(true) {} // TODO: simply for testing purposes
-    
-    // the thread will become trapped in the below function until the system is stopped
-    //controller.start(); // starts the loop for reading and writing packets
+    // the thread will become trapped (purposefully) in the below function until the system is stopped
+    // controller.start(); // starts the loop for reading and writing packets
     
     return 0;
 }
